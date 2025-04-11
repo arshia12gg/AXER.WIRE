@@ -1,11 +1,186 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <title>🔹AXER THE BEST 🔹</title>
+  <style>
+    body {
+      background-image: url('https://imgurl.ir/uploads/j601126_Picsart_25-01-30_15-06-35-661.png');
+      background-size: cover;
+      background-repeat: no-repeat;
+      font-family: sans-serif;
+      color: #fff;
+      text-align: center;
+    }
 
-git add
+    h1 {
+      color: #3498db;
+      margin-top: 30px;
+    }
 
-git commit -m Initial commit
+    table {
+      width: 90%;
+      margin: 30px auto;
+      border-collapse: collapse;
+      background: rgba(0,0,0,0.6);
+    }
 
-git branch -M main
+    th, td {
+      padding: 12px;
+      border: 1px solid #ccc;
+    }
 
-git remote add origin https://github.com/username/username.github.io.git
+    th {
+      background: #222;
+      color: #00aced;
+    }
 
-git push -u origin main
+    .ping-green { color: #0f0; }
+    .ping-yellow { color: #ff0; }
+    .ping-red { color: #f00; }
 
+    .download-btn {
+      padding: 6px 10px;
+      background: #2980b9;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    #config-name {
+      padding: 10px;
+      border-radius: 5px;
+      border: none;
+      width: 250px;
+      margin-top: 20px;
+    }
+
+    #generate-btn {
+      background: linear-gradient(to right, red, orange);
+      padding: 10px 20px;
+      border: none;
+      color: white;
+      margin-top: 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🔹AXER THE BEST 🔹</h1>
+
+  <input type="text" id="config-name" placeholder="نام کانفیگ را وارد کنید">
+  <br>
+  <button id="generate-btn" onclick="generateConfigs()">دریافت کانفیگ</button>
+
+  <table id="config-table">
+    <thead>
+      <tr>
+        <th>کشورها</th>
+        <th>دانلود</th>
+        <th>پینگ</th>
+        <th>وضعیت کانفیگ</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const countries = {
+      "GERMANY🇩🇪": "89.19",
+      "Türkiye🇹🇷": "85.105",
+      "Qatar🇶🇦": "86.36",
+      "Finland🇫🇮": "135.181",
+      "Arabia🇸🇦": "89.237",
+      "Emirate🇦🇪": "193.123",
+      "Sweden🇸🇪": "46.254",
+      "Bahrain🇧🇭": "80.95"
+    };
+
+    function randomKey() {
+      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+      let key = "";
+      for (let i = 0; i < 42; i++) {
+        key += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return key + "c=";
+    }
+
+    function randomIP(base) {
+      return `${base}.${rand(10, 250)}.${rand(10, 250)}`;
+    }
+
+    function rand(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function randomAllowedIPs() {
+      let ips = [];
+      for (let i = 0; i < 50; i++) {
+        ips.push(`${rand(10,255)}.${rand(0,255)}.${rand(0,255)}.${rand(0,255)}/32`);
+      }
+      return ips.join(', ');
+    }
+
+    function generateConfigs() {
+      const name = document.getElementById("config-name").value.trim();
+      if (!name) {
+        alert("لطفاً نام کانفیگ را وارد کنید");
+        return;
+      }
+
+      const tbody = document.querySelector("#config-table tbody");
+      tbody.innerHTML = "";
+
+      Object.entries(countries).forEach(([country, ipBase]) => {
+        const privateKey = randomKey();
+        const publicKey = randomKey();
+        const presharedKey = randomKey();
+        const ipAddress = `10.${rand(0,255)}.${rand(0,255)}.${rand(1,254)}`;
+        const peerIp = randomIP(ipBase);
+        const allowedIPs = randomAllowedIPs();
+
+        const ping = rand(20, 400);
+        let pingClass = '', status = '';
+
+        if (ping <= 100) {
+          pingClass = 'ping-green';
+          status = '<span class="ping-green">عالی برای گیم✅</span>';
+        } else if (ping <= 200) {
+          pingClass = 'ping-yellow';
+          status = '<span class="ping-yellow">نسبتاً خوب برای گیم✴️</span>';
+        } else {
+          pingClass = 'ping-red';
+          status = '<span class="ping-red">بدرد نمیخورد❌</span>';
+        }
+
+        const config = `[Interface]
+PrivateKey = ${privateKey}
+Address = ${ipAddress}/24
+DNS = 10.202.10.10
+
+[Peer]
+PublicKey = ${publicKey}
+PresharedKey = ${presharedKey}
+AllowedIPs = ${allowedIPs}
+Endpoint = ${peerIp}:51820`;
+
+        const blob = new Blob([config], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${country}</td>
+          <td><a href="${url}" download="${name}_${country.replace(/[^a-zA-Z]/g,'')}.conf"><button class="download-btn">دانلود</button></a></td>
+          <td class="${pingClass}">${ping} ms</td>
+          <td>${status}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+  </script>
+</body>
+</html>
